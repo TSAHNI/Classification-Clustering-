@@ -1,0 +1,72 @@
+---
+title: "Untitled"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+wine<-read.csv("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv",sep=";",header=T)
+#install.packages("class")
+#install.packages("gmodels")
+library(class)
+library(gmodels)
+
+```
+```{r}
+#1. Check data characteristics. Is there missing data? Prepare the data for analysis.
+str(wine)
+sum(is.na(wine))
+# There is no missing data as we see from the output of sum(is.na(wine))
+```
+```{r}
+# 2. What is the correlation between the attributes other than wine quality?
+cor(wine[-12])
+```
+```{r}
+# 3. Graph the frequency distribution of wine quality.
+hist(wine$quality,main="Wine Quality",xlab="Quality")
+```
+```{r}
+# 4. Reduce the levels of rating for quality to three levels as high, medium and low.
+# .the range function, range(quality) shows the range of quality as 3 to 9. We will allocate levels as explained .low to ratings 3 and 4 , medium to ratings 5,6 and 7, and high to ratings 8 and 9.
+wine$quality<-cut(wine$quality,breaks=c(3,5,8,10),labels=c("low","medium","high"),right=FALSE)
+
+```
+```{r}
+# 5. Normalize the data set.
+# We use the following function to normalize data .
+Normalize_function <- function(x) {(x - min(x))/(max(x) - min(x))}
+wine_normalized<- as.data.frame(lapply(wine[-12], Normalize_function))
+wine<-data.frame(wine_normalized,wine$quality)
+```
+```{r}
+# 6. Divide the data to training and testing groups.
+train_index <- sample(nrow(wine), floor(nrow(wine)*.7))
+train_set<-wine[train_index,]
+test_set<-wine[-train_index,]
+train_set_new<-train_set[-12]
+test_set_new<-test_set[-12]
+train_class<-train_set$wine.quality
+test_class <- test_set$wine.quality
+```
+```{r}
+# 7. Use the KNN algorithm to predict the quality of wine using its attributes.
+wine_knn_prediction <- knn(train = train_set_new, test = test_set_new, cl= train_class, k = 3) 
+```
+```{r}
+# 8. Evaluate the model performance.
+CrossTable(x=test_class, y=wine_knn_prediction, prop.chisq=FALSE)
+```
+
+
