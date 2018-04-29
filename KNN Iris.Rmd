@@ -1,0 +1,58 @@
+
+---
+title: "K-Nearest Neighbours in R"
+output: word_document
+---
+
+ CMTH 642 Course
+
+```{r setup, include=FALSE}
+library("class")
+library("gmodels")
+```
+
+We will be using the iris data set for this example.
+```{r}
+data(iris)
+head(iris)
+str(iris)
+```
+
+Let's split the iris dataset into training and test set.
+```{r}
+train_index <- sample(1:nrow(iris), 0.7 * nrow(iris))
+train.set <- iris[train_index,]
+test.set  <- iris[-train_index,]
+```
+
+Now, we remove the Species column from our training and test datasets.
+```{r}
+train.set_new <- train.set[-5]
+test.set_new <- test.set[-5]
+```
+
+Now, we store the labels from our training and test datasets.
+```{r}
+iris_train_labels <- train.set$Species 
+iris_test_labels <- test.set$Species
+```
+
+For k=3, let's make our prediction on the test set.
+```{r}
+iris_knn_prediction <- knn(train = train.set_new, test = test.set_new, cl= iris_train_labels, k = 3) 
+```
+
+Let's see the confusion matrix.
+```{r}
+CrossTable(x=iris_test_labels, y=iris_knn_prediction, prop.chisq=FALSE)
+```
+
+For k=11, let's make our prediction on the test set.
+```{r}
+iris_knn_prediction <- knn(train = train.set_new, test = test.set_new, cl= iris_train_labels, k = 11) 
+```
+
+Let's see the confusion matrix.
+```{r}
+CrossTable(x=iris_test_labels, y=iris_knn_prediction, prop.chisq=FALSE)
+```
